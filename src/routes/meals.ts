@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { checkSessionIdExists } from '../middleware/check-session-id-exists'
 import { knex } from '../database'
 import { randomUUID } from 'crypto'
+import { request } from 'http'
 
 export async function mealsRoutes(app: FastifyInstance) {
   app.addHook('preHandler', async (request) => {
@@ -45,6 +46,7 @@ export async function mealsRoutes(app: FastifyInstance) {
 
     return reply.send({ meals })
   })
+
   app.get(
     '/:mealId',
     { preHandler: checkSessionIdExists },
@@ -52,7 +54,9 @@ export async function mealsRoutes(app: FastifyInstance) {
       const paramSchema = z.object({
         mealId: z.string().uuid(),
       })
+
       const { mealId } = paramSchema.parse(request.params)
+
       const meal = await knex('meals').where({ id: mealId }).first()
 
       if (!meal) {
@@ -60,6 +64,66 @@ export async function mealsRoutes(app: FastifyInstance) {
       }
 
       return reply.send({ meal })
+    },
+  )
+
+  app.put(
+    '/:mealId',
+    { preHandler: checkSessionIdExists },
+    async (request, reply) => {
+      const paramSchema = z.object({
+        mealId: z.string().uuid(),
+      })
+
+      const { mealId } = paramSchema.parse(request.params)
+
+      const updateBodySchema = z.object({
+        name: z.string(),
+        description: z.string(),
+        isOnDiet: z.boolean(),
+        date: z.coerce.date(),
+      })
+
+      const { name, description, isOnDiet, date } = updateBodySchema.parse(
+        request.body,
+      )
+
+      const meal = await knex('meals').where({ id: mealId }).first()
+
+      if (!meal) {
+        return reply.status(404).send({ error: 'Meal not found' })
+      }
+
+      await knex('meals').where({ id: mealId }).update({
+        name,
+        description,
+        is_on_diet: isOnDiet,
+        date: date.getTime(),
+      })
+
+      return reply.status(204).send()
+    },
+  )
+
+  app.delete(
+    '/:mealId',
+    { preHandler: checkSessionIdExists },
+    async (request, reply) => {
+      const paramSchema = z.object({
+        mealId: z.string().uuid(),
+      })
+
+      const { mealId } = paramSchema.parse(request.params)
+
+      const meal = await knex('meals').where({ id: mealId }).first()
+
+      if (!meal) {
+        return reply.status(404).send({ error: 'Meal not found' })
+      }
+
+      await knex('meals').where({ id: mealId }).delete()
+
+      return reply.status(204).send()
     },
   )
 }
