@@ -17,9 +17,9 @@
 - [x] O usuário só pode visualizar, editar e apagar as refeições o qual ele criou
 - [x] Deve ser possível recuperar as métricas de um usuário
 
-        [x] - Quantidade total de refeições registradas
-        [x] - Quantidade total de refeições dentro da dieta
-        [x] - Quantidade total de refeições fora da dieta
-        [x] - Melhor sequência de refeições dentro da dieta
+        - [x] Quantidade total de refeições registradas
+        - [x] Quantidade total de refeições dentro da dieta
+        - [x] Quantidade total de refeições fora da dieta
+        - [x] Melhor sequência de refeições dentro da dieta
     
 
